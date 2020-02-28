@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,8 +8,15 @@ public class Player : MonoBehaviour
 
     [Header("Config")]
     [Range(0f, 10f)] [SerializeField] float runSpeed = 3f;
+    [Range(1f, 30f)] [SerializeField] float jumpSpeed = 5f;
+    [Range(0f, 0.5f)] [SerializeField] float climbSpeed = 0.1f;
+    [Range(0f, 2f)] [SerializeField] float timeScale = 1f;
+
+    float myEpsilon = 1e-5f;
     Rigidbody2D myRigidBody;
+    Collider2D myCollider;
     Animator myAnimator;
+    float startingGravity;
     bool isRunning = false;
 
 
@@ -17,39 +25,134 @@ public class Player : MonoBehaviour
     {
         myRigidBody = GetComponent<Rigidbody2D>();
         myAnimator = GetComponent<Animator>();
-        myRigidBody.velocity = new Vector2(0f, 0f); ;
+        myCollider = GetComponent<Collider2D>();
+        startingGravity = myRigidBody.gravityScale;
     }
 
     // Update is called once per frame
     void Update()
     {
+        Time.timeScale = timeScale;
         Run();
+        Jump();
+        Climb();
         FlipSprite();
     }
 
     private void Run()
     {
-        float controlThrow = Input.GetAxis("Horizontal") * runSpeed; // value between -1 to +1
+        float controlThrow = Input.GetAxis("Horizontal") * runSpeed;
         Vector2 playerVelocity = new Vector2(controlThrow, myRigidBody.velocity.y);
         myRigidBody.velocity = playerVelocity;
-        if (Mathf.Abs(myRigidBody.velocity.x) > Mathf.Epsilon)
+
+        // Set animation state based 
+        if (HasNoVerticalVelocity() && IsTouchingGround())
         {
-            myAnimator.SetBool("running", true);
-        } else
+            if (PlayerHasHorizontalSpeed())
+            {
+                SetRunning();
+            }
+            else
+            {
+                SetIdle();
+            }
+        }
+    }
+
+    private void Jump()
+    {
+        if (!IsTouchingGround()) { return; }
+        
+        // if on ground and not in the process of jumping
+        if (myAnimator.GetBool("jumping") && HasNoVerticalVelocity()) {
+            SetIdle();
+        }
+
+        if (Input.GetButtonDown("Jump"))
         {
-            myAnimator.SetBool("running", false);
+            SetJumping();
+            Vector2 jumpVelocityToAdd = new Vector2(0f, jumpSpeed);
+            myRigidBody.velocity += jumpVelocityToAdd;
         }
 
     }
 
+    private void Climb()
+    {
+        if (!IsTouchingLadder()) {
+            myAnimator.SetBool("climbing", false);
+            myRigidBody.gravityScale = startingGravity;
+            return;
+        }
+        
+        if (Input.GetButton("Vertical"))
+        {
+            SetClimbing();
+            myRigidBody.gravityScale = 0f;
+            myRigidBody.velocity = new Vector2(0f, 0f);
+            float controlThrow = Input.GetAxis("Vertical");
+            myRigidBody.position =
+                new Vector2(myRigidBody.position.x,
+                            myRigidBody.position.y + controlThrow * climbSpeed);
+        }
+    }
+
     private void FlipSprite()
     {
-        bool playerHasHorizontalSpeed = Mathf.Abs(myRigidBody.velocity.x) > Mathf.Epsilon;
-        if (playerHasHorizontalSpeed)
+        if (PlayerHasHorizontalSpeed())
         {
             Vector2 s = transform.localScale;
             transform.localScale = new Vector2(Mathf.Abs(s.x) * Mathf.Sign(myRigidBody.velocity.x), s.y);
             
         }
     }
+
+    private bool PlayerHasHorizontalSpeed()
+    {
+        return Mathf.Abs(myRigidBody.velocity.x) > myEpsilon; 
+    }
+
+    private bool IsTouchingGround()
+    {
+        return myCollider.IsTouchingLayers(LayerMask.GetMask("Ground"));
+    }
+
+    private bool IsTouchingLadder()
+    {
+        return myCollider.IsTouchingLayers(LayerMask.GetMask("Climbing"));
+    }
+
+    private bool HasNoVerticalVelocity()
+    {
+        return Mathf.Abs(myRigidBody.velocity.y) < myEpsilon;
+    }
+
+    private void SetIdle()
+    {
+        myAnimator.SetBool("running", false);
+        myAnimator.SetBool("jumping", false);
+        myAnimator.SetBool("climbing", false);
+
+    }
+    private void SetRunning()
+    {
+        myAnimator.SetBool("running", true);
+        myAnimator.SetBool("jumping", false);
+        myAnimator.SetBool("climbing", false);
+    }
+    private void SetJumping()
+    {
+        myAnimator.SetBool("running", false);
+        myAnimator.SetBool("jumping", true);
+        myAnimator.SetBool("climbing", false);
+    }
+
+    private void SetClimbing()
+    {
+        myAnimator.SetBool("running", false);
+        myAnimator.SetBool("jumping", false);
+        myAnimator.SetBool("climbing", true);
+
+    }
+
 }
