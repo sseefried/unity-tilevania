@@ -5,12 +5,13 @@ using UnityEngine;
 public class EnemyMovement : MonoBehaviour
 {
     [SerializeField] float moveSpeed = 1f;
+    [SerializeField] float deathWaitInSeconds = 0.5f;
+    [SerializeField] float deathBounceVelocity = 30f;
     Animator myAnimator;
     Rigidbody2D myRigidBody;
     CapsuleCollider2D myCollider;
     BoxCollider2D myFeetCollider;
-    BoxCollider2D headCollider;
-    bool dying = false;
+    Collider2D headCollider;
     
 
     float direction = 1f; // either 1 or -1f; 1 is left, -1 is right
@@ -23,7 +24,13 @@ public class EnemyMovement : MonoBehaviour
         myRigidBody = GetComponent<Rigidbody2D>();
         myCollider = GetComponent<CapsuleCollider2D>();
         myFeetCollider = GetComponent<BoxCollider2D>();
-        headCollider = GetComponentInChildren<BoxCollider2D>();
+        foreach (Collider2D c in GetComponentsInChildren<Collider2D>())
+        {
+            if (c.tag == "MushroomHead")
+            {
+                headCollider = c;
+            }
+        }
     }
 
     // Update is called once per frame
@@ -38,23 +45,39 @@ public class EnemyMovement : MonoBehaviour
         transform.localScale = new Vector2(direction, transform.localScale.y);
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    private void OnTriggerEnter2D(Collider2D otherCollider)
     {
-        if (!dying && collision.gameObject.GetComponent<Player>())
-        {                               
-            Destroy(collision.gameObject); // destroy player
+        Player player = otherCollider.gameObject.GetComponent<Player>();
+        if (!player) { return; }
+        Rigidbody2D r = otherCollider.gameObject.GetComponent<Rigidbody2D>();        
+        if (!r) { return; } // defensive
+
+        if (myCollider.IsTouching(otherCollider))
+        {
+            player.HandleDeath();
+            headCollider.enabled = false;
+        }
+
+        if (headCollider.IsTouching(otherCollider))
+        {
+            HandleDeath(player);
         }
     }
 
-    public void HandleDeath()
+    private void HandleDeath(Player player)
     {
-        dying = true;
-        StartCoroutine(Death());
+        myRigidBody.velocity = new Vector2(0f, 0f);
+        player.BounceOnKill(deathBounceVelocity);
+        myAnimator.SetBool("dying", true);
+        myCollider.enabled = false;
+        StartCoroutine(Die());
     }
 
-    public IEnumerator Death()
+    public IEnumerator Die()
     {
-        yield return new WaitForSeconds(0.5f); // FIXME: magic number
+        yield return new WaitForSeconds(deathWaitInSeconds); 
         Destroy(gameObject);
     }
+
+
 }

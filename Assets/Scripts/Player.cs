@@ -11,7 +11,9 @@ public class Player : MonoBehaviour
     [Range(1f, 30f)] [SerializeField] float jumpSpeed = 5f;
     [Range(0f, 0.5f)] [SerializeField] float climbSpeed = 0.1f;
     [Range(0f, 2f)] [SerializeField] float timeScale = 1f;
+    [SerializeField] float deathWaitInSeconds = 2f;
 
+    bool dying = false;
     float myEpsilon = 1e-5f;
     Rigidbody2D myRigidBody;
     CapsuleCollider2D myBodyCollider;
@@ -35,10 +37,32 @@ public class Player : MonoBehaviour
     void Update()
     {
         Time.timeScale = timeScale;
-        Run();
-        Jump();
-        Climb();
-        FlipSprite();
+        if (!dying)
+        {
+            Run();
+            Jump();
+            Climb();
+            FlipSprite();
+        }
+    }
+
+    public void HandleDeath()
+    {
+        Debug.Log("Dead!");
+        myRigidBody.gravityScale = 0f;
+        myRigidBody.velocity = new Vector2(0f, 0f);
+        foreach (Collider2D c in GetComponentsInChildren<Collider2D>())
+        {
+            c.enabled = false;
+        }
+        myAnimator.SetBool("dying", true);
+        dying = true;
+        StartCoroutine(Die());
+    }
+
+    public void BounceOnKill(float killBounceVelocity)
+    {
+        myRigidBody.velocity = new Vector2(myRigidBody.velocity.x, killBounceVelocity);
     }
 
     private void Run()
@@ -157,4 +181,9 @@ public class Player : MonoBehaviour
 
     }
 
+    private IEnumerator Die()
+    {
+        yield return new WaitForSeconds(deathWaitInSeconds);
+        Destroy(gameObject);
+    }
 }
