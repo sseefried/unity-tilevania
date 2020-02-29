@@ -48,13 +48,9 @@ public class Player : MonoBehaviour
 
     public void HandleDeath()
     {
-        Debug.Log("Dead!");
+        DisableColliders();
         myRigidBody.gravityScale = 0f;
         myRigidBody.velocity = new Vector2(0f, 0f);
-        foreach (Collider2D c in GetComponentsInChildren<Collider2D>())
-        {
-            c.enabled = false;
-        }
         myAnimator.SetBool("dying", true);
         dying = true;
         StartCoroutine(Die());
@@ -186,4 +182,13 @@ public class Player : MonoBehaviour
         yield return new WaitForSeconds(deathWaitInSeconds);
         Destroy(gameObject);
     }
+
+    private void DisableColliders()
+    {
+        foreach (Collider2D c in GetComponentsInChildren<Collider2D>())
+        {
+            c.enabled = false;
+        }
+    }
+
 }

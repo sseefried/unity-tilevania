@@ -16,7 +16,6 @@ public class EnemyMovement : MonoBehaviour
 
     float direction = 1f; // either 1 or -1f; 1 is left, -1 is right
 
-
     // Start is called before the first frame update
     void Start()
     {
@@ -66,6 +65,8 @@ public class EnemyMovement : MonoBehaviour
 
     private void HandleDeath(Player player)
     {
+        DisableColliders();
+        FindObjectOfType<Spawner>().MushroomKilled();
         myRigidBody.velocity = new Vector2(0f, 0f);
         player.BounceOnKill(deathBounceVelocity);
         myAnimator.SetBool("dying", true);
@@ -79,5 +80,12 @@ public class EnemyMovement : MonoBehaviour
         Destroy(gameObject);
     }
 
+    private void DisableColliders()
+    {
+        foreach (Collider2D c in GetComponentsInChildren<Collider2D>())
+        {
+            c.enabled = false;
+        }
+    }
 
 }
