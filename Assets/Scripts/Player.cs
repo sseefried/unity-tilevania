@@ -14,7 +14,8 @@ public class Player : MonoBehaviour
 
     float myEpsilon = 1e-5f;
     Rigidbody2D myRigidBody;
-    Collider2D myCollider;
+    CapsuleCollider2D myBodyCollider;
+    BoxCollider2D myFeetCollider;
     Animator myAnimator;
     float startingGravity;
     bool isRunning = false;
@@ -25,7 +26,8 @@ public class Player : MonoBehaviour
     {
         myRigidBody = GetComponent<Rigidbody2D>();
         myAnimator = GetComponent<Animator>();
-        myCollider = GetComponent<Collider2D>();
+        myBodyCollider = GetComponent<CapsuleCollider2D>();
+        myFeetCollider = GetComponent<BoxCollider2D>();
         startingGravity = myRigidBody.gravityScale;
     }
 
@@ -114,12 +116,12 @@ public class Player : MonoBehaviour
 
     private bool IsTouchingGround()
     {
-        return myCollider.IsTouchingLayers(LayerMask.GetMask("Ground"));
+        return myFeetCollider.IsTouchingLayers(LayerMask.GetMask("Ground"));
     }
 
     private bool IsTouchingLadder()
     {
-        return myCollider.IsTouchingLayers(LayerMask.GetMask("Climbing"));
+        return myBodyCollider.IsTouchingLayers(LayerMask.GetMask("Climbing"));
     }
 
     private bool HasNoVerticalVelocity()
