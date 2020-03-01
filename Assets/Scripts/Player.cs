@@ -37,24 +37,14 @@ public class Player : MonoBehaviour
     void Update()
     {
         Time.timeScale = timeScale;
-        if (!dying)
-        {
-            Run();
-            Jump();
-            Climb();
-            FlipSprite();
-        }
+        if (dying) { return; }
+        Run();
+        Jump();
+        Climb();
+        FlipSprite();
+        Die();
     }
 
-    public void HandleDeath()
-    {
-        DisableColliders();
-        myRigidBody.gravityScale = 0f;
-        myRigidBody.velocity = new Vector2(0f, 0f);
-        myAnimator.SetBool("dying", true);
-        dying = true;
-        StartCoroutine(Die());
-    }
 
     public void BounceOnKill(float killBounceVelocity)
     {
@@ -106,8 +96,9 @@ public class Player : MonoBehaviour
             myRigidBody.gravityScale = startingGravity;
             return;
         }
-        
-        if (Input.GetButton("Vertical"))
+
+
+        if (Input.GetButton("Vertical") || IsFalling())
         {
             SetClimbing();
             myRigidBody.gravityScale = 0f;
@@ -116,9 +107,24 @@ public class Player : MonoBehaviour
             myRigidBody.position =
                 new Vector2(myRigidBody.position.x,
                             myRigidBody.position.y + controlThrow * climbSpeed);
+
         }
     }
 
+    private void Die()
+    {
+        if (IsTouchingLayer("Enemy") || IsTouchingLayer("Hazards"))
+        {
+            Debug.Log("Touching!");
+            DisableColliders();
+            myRigidBody.gravityScale = 0f;
+            myRigidBody.velocity = new Vector2(0f, 0f);
+            myAnimator.SetTrigger("dying");
+            dying = true;
+            StartCoroutine(WaitAndDie());
+        }
+
+    }
     private void FlipSprite()
     {
         if (PlayerHasHorizontalSpeed())
@@ -177,7 +183,7 @@ public class Player : MonoBehaviour
 
     }
 
-    private IEnumerator Die()
+    private IEnumerator WaitAndDie()
     {
         yield return new WaitForSeconds(deathWaitInSeconds);
         Destroy(gameObject);
@@ -191,4 +197,23 @@ public class Player : MonoBehaviour
         }
     }
 
+    private bool IsTouchingLayer(string layer)
+    {
+        return myBodyCollider.IsTouchingLayers(LayerMask.GetMask(layer));
+    }
+
+    /* Round to the nearest 0.5.
+     *
+     *   RoundToHalf(3.9) == 4.0
+     *   RoundToHalf(3.4) == 3.5
+     */
+    private float RoundToHalf(float x)
+    {
+        return Mathf.Round(x * 2) / 2;
+    }
+
+    private bool IsFalling()
+    {
+        return myRigidBody.velocity.y < -myEpsilon;
+    }
 }

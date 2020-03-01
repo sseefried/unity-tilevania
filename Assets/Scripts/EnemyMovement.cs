@@ -7,13 +7,14 @@ public class EnemyMovement : MonoBehaviour
     [SerializeField] float moveSpeed = 1f;
     [SerializeField] float deathWaitInSeconds = 0.5f;
     [SerializeField] float deathBounceVelocity = 30f;
+
+    bool dying = false;
     Animator myAnimator;
     Rigidbody2D myRigidBody;
     CapsuleCollider2D myCollider;
     BoxCollider2D myFeetCollider;
     Collider2D headCollider;
     
-
     float direction = 1f; // either 1 or -1f; 1 is left, -1 is right
 
     // Start is called before the first frame update
@@ -35,6 +36,7 @@ public class EnemyMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (dying) { return; }
         myRigidBody.velocity = new Vector2(moveSpeed * -direction, 0f);
     }
 
@@ -51,12 +53,6 @@ public class EnemyMovement : MonoBehaviour
         Rigidbody2D r = otherCollider.gameObject.GetComponent<Rigidbody2D>();        
         if (!r) { return; } // defensive
 
-        if (myCollider.IsTouching(otherCollider))
-        {
-            player.HandleDeath();
-            headCollider.enabled = false;
-        }
-
         if (headCollider.IsTouching(otherCollider))
         {
             HandleDeath(player);
@@ -69,7 +65,8 @@ public class EnemyMovement : MonoBehaviour
         FindObjectOfType<Spawner>().MushroomKilled();
         myRigidBody.velocity = new Vector2(0f, 0f);
         player.BounceOnKill(deathBounceVelocity);
-        myAnimator.SetBool("dying", true);
+        myAnimator.SetTrigger("dying");
+        dying = true;
         myCollider.enabled = false;
         StartCoroutine(Die());
     }
