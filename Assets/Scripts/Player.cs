@@ -115,7 +115,6 @@ public class Player : MonoBehaviour
     {
         if (IsTouchingLayer("Enemy") || IsTouchingLayer("Hazards"))
         {
-            Debug.Log("Touching!");
             DisableColliders();
             myRigidBody.gravityScale = 0f;
             myRigidBody.velocity = new Vector2(0f, 0f);

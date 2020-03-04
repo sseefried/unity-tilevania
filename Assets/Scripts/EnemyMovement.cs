@@ -37,11 +37,13 @@ public class EnemyMovement : MonoBehaviour
     void Update()
     {
         if (dying) { return; }
+        if (!IsTouchingLayer("Ground")) { return; }
         myRigidBody.velocity = new Vector2(moveSpeed * -direction, 0f);
     }
 
     private void OnTriggerExit2D(Collider2D otherCollider)
     {
+        if (!IsTouchingLayer("Ground")) { return;  }
         direction *= -1;
         transform.localScale = new Vector2(direction, transform.localScale.y);
     }
@@ -61,13 +63,13 @@ public class EnemyMovement : MonoBehaviour
 
     private void HandleDeath(Player player)
     {
-        DisableColliders();
-        FindObjectOfType<Spawner>().MushroomKilled();
+        DisableTriggers();
+        Spawner spawner = FindObjectOfType<Spawner>();
+        if (spawner) { spawner.MushroomKilled(); }
         myRigidBody.velocity = new Vector2(0f, 0f);
         player.BounceOnKill(deathBounceVelocity);
         myAnimator.SetTrigger("dying");
         dying = true;
-        myCollider.enabled = false;
         StartCoroutine(Die());
     }
 
@@ -77,12 +79,21 @@ public class EnemyMovement : MonoBehaviour
         Destroy(gameObject);
     }
 
-    private void DisableColliders()
+    private void DisableTriggers()
     {
         foreach (Collider2D c in GetComponentsInChildren<Collider2D>())
         {
-            c.enabled = false;
+            if (c.isTrigger )
+            {
+                c.enabled = false;
+            }
         }
     }
+
+    private bool IsTouchingLayer(string layer)
+    {
+        return myCollider.IsTouchingLayers(LayerMask.GetMask(layer));
+    }
+
 
 }

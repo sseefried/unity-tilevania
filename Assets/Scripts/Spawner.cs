@@ -12,11 +12,11 @@ public class Spawner : MonoBehaviour
 
     IEnumerator Start()
     {
-        while (true)
+        do
         {
-            yield return new WaitForSeconds(delay);
             SpawnAttacker();
-        }
+            yield return new WaitForSeconds(delay);
+        } while (true);
     }
 
     private void SpawnAttacker()

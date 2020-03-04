@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - MushroomHead
+  - Physics
   layers:
   - Default
   - TransparentFX
@@ -20,8 +21,8 @@ TagManager:
   - Background
   - Enemy
   - Hazards
-  - 
-  - 
+  - Enemy Physics
+  - Player Physics
   - 
   - 
   - 
