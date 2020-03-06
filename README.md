@@ -34,3 +34,8 @@ if (headCollider.IsTouching(otherCollider))
     HandleDeath(player);
 }
 ```
+
+## If you player gets stuck in the wall
+
+Make sure that you have set your RigidBody2D physical material to have 
+zero friction.
