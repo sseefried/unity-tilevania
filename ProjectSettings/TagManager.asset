@@ -6,6 +6,7 @@ TagManager:
   tags:
   - MushroomHead
   - Physics
+  - MushroomWallCollider
   layers:
   - Default
   - TransparentFX
@@ -23,7 +24,7 @@ TagManager:
   - Hazards
   - Enemy Physics
   - Player Physics
-  - 
+  - Interactables
   - 
   - 
   - 
@@ -57,6 +58,9 @@ TagManager:
     locked: 0
   - name: Player
     uniqueID: 240654269
+    locked: 0
+  - name: Interactables
+    uniqueID: 1193947773
     locked: 0
   - name: Foreground
     uniqueID: 616611595

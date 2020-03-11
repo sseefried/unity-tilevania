@@ -10,7 +10,6 @@ public class Player : MonoBehaviour
     [Range(0f, 10f)] [SerializeField] float runSpeed = 3f;
     [Range(1f, 30f)] [SerializeField] float jumpSpeed = 5f;
     [Range(0f, 0.5f)] [SerializeField] float climbSpeed = 0.1f;
-    [Range(0f, 2f)] [SerializeField] float timeScale = 1f;
     [SerializeField] float deathWaitInSeconds = 2f;
 
     bool dying = false;
@@ -36,7 +35,6 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Time.timeScale = timeScale;
         if (dying) { return; }
         Run();
         Jump();
