@@ -14,6 +14,7 @@ public class EnemyMovement : MonoBehaviour
     CapsuleCollider2D myCollider;
     BoxCollider2D myFeetCollider;
     Collider2D headCollider;
+    Collider2D wallCollider;
     
     float direction = 1f; // either 1 or -1f; 1 is left, -1 is right
 
@@ -30,6 +31,11 @@ public class EnemyMovement : MonoBehaviour
             {
                 headCollider = c;
             }
+            if (c.tag == "MushroomWallCollider")
+            {
+                Debug.Log("Set wall collider");
+                wallCollider = c;
+            }
         }
     }
 
@@ -44,12 +50,17 @@ public class EnemyMovement : MonoBehaviour
     private void OnTriggerExit2D(Collider2D otherCollider)
     {
         if (!IsTouchingLayer("Ground")) { return;  }
-        direction *= -1;
-        transform.localScale = new Vector2(direction, transform.localScale.y);
+        //ChangeDirection();
     }
 
     private void OnTriggerEnter2D(Collider2D otherCollider)
     {
+
+        if (wallCollider.IsTouchingLayers(LayerMask.GetMask("Ground")))
+        {
+            Debug.Log("touching the wall");
+            ChangeDirection();
+        }
         Player player = otherCollider.gameObject.GetComponent<Player>();
         if (!player) { return; }
         Rigidbody2D r = otherCollider.gameObject.GetComponent<Rigidbody2D>();        
@@ -93,6 +104,12 @@ public class EnemyMovement : MonoBehaviour
     private bool IsTouchingLayer(string layer)
     {
         return myCollider.IsTouchingLayers(LayerMask.GetMask(layer));
+    }
+
+    private void ChangeDirection()
+    {
+        direction *= -1;
+        transform.localScale = new Vector2(direction, transform.localScale.y);
     }
 
 
