@@ -33,7 +33,6 @@ public class EnemyMovement : MonoBehaviour
             }
             if (c.tag == "MushroomWallCollider")
             {
-                Debug.Log("Set wall collider");
                 wallCollider = c;
             }
         }
@@ -49,8 +48,10 @@ public class EnemyMovement : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D otherCollider)
     {
-        if (!IsTouchingLayer("Ground")) { return;  }
-        //ChangeDirection();
+        if (!IsTouchingLayer("Ground") && !wallCollider.IsTouchingLayers(LayerMask.GetMask("Ground")))
+        {
+            ChangeDirection();
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D otherCollider)
@@ -58,7 +59,6 @@ public class EnemyMovement : MonoBehaviour
 
         if (wallCollider.IsTouchingLayers(LayerMask.GetMask("Ground")))
         {
-            Debug.Log("touching the wall");
             ChangeDirection();
         }
         Player player = otherCollider.gameObject.GetComponent<Player>();

@@ -11,12 +11,26 @@ public class Menu : MonoBehaviour
     // Start is called before the first frame update
     public void StartFirstLevel()
     {
+        DestroyGameSession();
         SceneManager.LoadScene(level1Index);
     }
 
     public void LoadMainMenu()
     {
+        DestroyGameSession();
         SceneManager.LoadScene(mainMenuIndex);
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
+    }
+
+    private void DestroyGameSession()
+    {
+        GameSession session = FindObjectOfType<GameSession>();
+        if (session) { Destroy(session.gameObject); }
+
     }
 
 }

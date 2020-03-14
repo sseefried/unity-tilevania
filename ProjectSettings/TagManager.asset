@@ -7,6 +7,7 @@ TagManager:
   - MushroomHead
   - Physics
   - MushroomWallCollider
+  - Coin
   layers:
   - Default
   - TransparentFX

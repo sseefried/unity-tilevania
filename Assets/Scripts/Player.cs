@@ -183,7 +183,7 @@ public class Player : MonoBehaviour
     private IEnumerator WaitAndDie()
     {
         yield return new WaitForSeconds(deathWaitInSeconds);
-        Destroy(gameObject);
+        FindObjectOfType<GameSession>().ProcessPlayerDeath();
     }
 
     private void DisableColliders()
